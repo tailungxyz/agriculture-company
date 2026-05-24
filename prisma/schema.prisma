@@ -1,0 +1,135 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ====================== MODELS CHÍNH ======================
+
+model Category {
+  id          String   @id @default(cuid())
+  name        String   // Tên danh mục (Phân bón, Máy móc, Giống cây...)
+  slug        String   @unique
+  description String?
+  image       String?  // Ảnh đại diện danh mục
+  type        CategoryType @default(PRODUCT)
+  
+  products    Product[]
+  posts       Post[]
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("categories")
+}
+
+model Product {
+  id              String   @id @default(cuid())
+  name            String
+  slug            String   @unique
+  description     String?
+  content         String?  // Mô tả chi tiết (rich text)
+  
+  price           Decimal? // Giá bán
+  discountPrice   Decimal?
+  unit            String?  // kg, tấn, chiếc, lít...
+  
+  images          String[] // Array URL ảnh
+  featuredImage   String?  // Ảnh chính
+  
+  isFeatured      Boolean  @default(false)
+  isInStock       Boolean  @default(true)
+  status          ProductStatus @default(PUBLISHED)
+  
+  categoryId      String
+  category        Category @relation(fields: [categoryId], references: [id])
+  
+  metaTitle       String?
+  metaDescription String?
+  metaKeywords    String?
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@map("products")
+}
+
+model Post {
+  id              String   @id @default(cuid())
+  title           String
+  slug            String   @unique
+  excerpt         String?
+  content         String   // Rich text (Markdown hoặc HTML)
+  
+  featuredImage   String?
+  images          String[]
+  
+  isFeatured      Boolean  @default(false)
+  status          PostStatus @default(PUBLISHED)
+  
+  categoryId      String?
+  category        Category? @relation(fields: [categoryId], references: [id])
+  
+  metaTitle       String?
+  metaDescription String?
+  metaKeywords    String?
+  
+  publishedAt     DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@map("posts")
+}
+
+model Recruitment {
+  id              String   @id @default(cuid())
+  position        String   // Vị trí tuyển dụng
+  slug            String   @unique
+  department      String   // Bộ phận
+  location        String   // Địa điểm làm việc
+  type            RecruitmentType // Toàn thời gian, Bán thời gian...
+  
+  salaryRange     String?  // 15-25 triệu, Thỏa thuận...
+  description     String   // Mô tả công việc (rich text)
+  requirements    String   // Yêu cầu ứng viên
+  benefits        String   // Quyền lợi
+  
+  isActive        Boolean  @default(true)
+  
+  metaTitle       String?
+  metaDescription String?
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@map("recruitments")
+}
+
+// ====================== ENUMS ======================
+
+enum CategoryType {
+  PRODUCT
+  POST
+  RECRUITMENT
+}
+
+enum ProductStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum PostStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum RecruitmentType {
+  FULL_TIME
+  PART_TIME
+  INTERNSHIP
+  CONTRACT
+}
