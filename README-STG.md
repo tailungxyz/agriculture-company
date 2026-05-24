@@ -1,0 +1,1 @@
+echo "Staging branch for Agriculture website" > README-STAGING.md
